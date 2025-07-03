@@ -1,0 +1,57 @@
+[
+    {
+      "id": "scene-1",
+      "name": "סלון מודרני",
+      "backgroundUrl": "https://images.unsplash.com/photo-1554995207-c18c203602cb?w=2000&q=80",
+      "mockupImageUrl": "/assets/mockups/FM1.png",
+      "containerWidth": 550,
+      "containerHeight": 600,
+      "imageStyles": {
+        "right": "240px",
+        "top": "0px",
+        "maxHeight": "215px",
+        "--d": "6px",
+        "--a": "5deg",
+        "--x": "16px",
+        "--_l": "6px",
+        "--_r": "18px"
+      }
+    },
+    {
+      "id": "scene-2",
+      "name": "משרד / גלריה",
+      "backgroundUrl": "https://images.unsplash.com/photo-1616594039964-ae9197a20c6b?w=2000&q=80",
+      "mockupImageUrl": "/assets/mockups/FM2.png",
+      "containerWidth": 550,
+      "containerHeight": 600,
+      "imageStyles": {
+        "right": "240px",
+        "top": "0px",
+        "maxHeight": "215px",
+        "--d": "6px",
+        "--a": "5deg",
+        "--x": "16px",
+        "--_l": "6px",
+        "--_r": "18px"
+      }
+    },
+    {
+      "id": "scene-3",
+      "name": "תצוגה בזווית",
+      "backgroundUrl": "https://images.unsplash.com/photo-1616594039964-ae9197a20c6b?w=2000&q=80",
+      "mockupImageUrl": "/assets/mockups/FM3.png",
+      "containerWidth": 550,
+      "containerHeight": 600,
+      "imageStyles": {
+        "right": "240px",
+        "top": "0px",
+        "maxHeight": "215px",
+        "--d": "6px",
+        "--a": "5deg",
+        "--x": "16px",
+        "--_l": "6px",
+        "--_r": "18px"
+      }
+    }
+  ]
+  
