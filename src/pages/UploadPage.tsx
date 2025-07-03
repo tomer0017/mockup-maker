@@ -1,10 +1,9 @@
 import React, { useRef, useState } from "react";
 import ImageUploader from "../components/ImageUploader";
-import { toJpeg } from "html-to-image";
+import { toBlob } from "html-to-image";
 import GenericMockup from "../components/common/GenericMockup";
 
 const scenes = [
-
   {
     id: "scene2",
     background: "/assets/mockups/FM1.png",
@@ -87,7 +86,6 @@ const scenes = [
       },
     ],
   },
-
 ];
 
 export default function UploadPage() {
@@ -106,24 +104,41 @@ export default function UploadPage() {
     setImageUrl(null);
   };
 
-  const handleDownload = async (id: string) => {
-    const ref = refs.current[id];
-    if (!ref) return;
+  const isIphoneChrome = () => {
+    const ua = navigator.userAgent;
+    return /CriOS/.test(ua) && /iPhone/.test(ua);
+  };
 
+  const handleDownload = async (ref: React.RefObject<HTMLDivElement>) => {
+    if (!ref.current) return;
+    await new Promise((res) => setTimeout(res, 500));
     try {
-      const dataUrl = await toJpeg(ref, { quality: 0.95 });
-      const link = document.createElement("a");
-      link.download = "mockup.jpg";
-      link.href = dataUrl;
-      link.click();
-    } catch (err) {
-      console.error("Error generating JPEG:", err);
+      const blob = await toBlob(ref.current, {
+        quality: 0.95,
+        backgroundColor: "white",
+      });
+
+      if (!blob) throw new Error("יצירת Blob נכשלה");
+
+      const url = URL.createObjectURL(blob);
+
+      if (isIphoneChrome()) {
+        window.open(url, "_blank");
+      } else {
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "mockup.jpg";
+        link.click();
+      }
+    } catch (error) {
+      console.error("שגיאה בהורדה:", error);
+      alert("אירעה שגיאה בהורדה 😢 נסה שוב או דרך Safari");
     }
   };
 
   return (
     <div className="app py-5 rounded">
-      <h1 className="text-center m-5" >העלאת ציור ובחירת מסגרת</h1>
+      <h1 className="text-center m-5">העלאת ציור ובחירת מסגרת</h1>
       {imageUrl ? (
         <div className="text-center mb-4">
           <div className="pb-5">
@@ -160,7 +175,9 @@ export default function UploadPage() {
                   imageStyles={scene.imageStyles}
                   imageClassName={scene.imageClassName}
                   overlays={scene.overlays}
-                  onDownload={() => handleDownload(scene.id)}
+                  onDownload={() =>
+                    handleDownload({ current: refs.current[scene.id] })
+                  }
                 />
               </div>
             ))}
