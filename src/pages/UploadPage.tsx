@@ -91,12 +91,12 @@ const scenes = [
 export default function UploadPage() {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
-
   const refs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const handleImageSelect = (file: File) => {
+    const objectUrl = URL.createObjectURL(file);
     setSelectedImage(file);
-    setImageUrl(URL.createObjectURL(file));
+    setImageUrl(objectUrl);
   };
 
   const handleRemoveImage = () => {
@@ -109,17 +109,33 @@ export default function UploadPage() {
     return /CriOS/.test(ua) && /iPhone/.test(ua);
   };
 
+  const waitForImagesToLoad = (element: HTMLElement): Promise<void> => {
+    const imgs = element.querySelectorAll("img");
+    const promises = Array.from(imgs).map(
+      (img) =>
+        new Promise<void>((resolve) => {
+          if (img.complete) resolve();
+          else {
+            img.onload = () => resolve();
+            img.onerror = () => resolve();
+          }
+        })
+    );
+    return Promise.all(promises).then(() => undefined);
+  };
+
   const handleDownload = async (ref: React.RefObject<HTMLDivElement>) => {
     if (!ref.current) return;
-    await new Promise((res) => setTimeout(res, 500));
+    await waitForImagesToLoad(ref.current);
+    await new Promise((res) => setTimeout(res, 100));
+
     try {
       const blob = await toBlob(ref.current, {
         quality: 0.95,
         backgroundColor: "white",
       });
 
-      if (!blob) throw new Error("יצירת Blob נכשלה");
-
+      if (!blob) throw new Error("Blob creation failed");
       const url = URL.createObjectURL(blob);
 
       if (isIphoneChrome()) {
@@ -146,6 +162,7 @@ export default function UploadPage() {
               src={imageUrl}
               alt="Preview"
               className="img-fluid rounded"
+              crossOrigin="anonymous"
               style={
                 {
                   maxHeight: "400px",
