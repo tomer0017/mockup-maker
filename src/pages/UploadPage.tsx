@@ -1,9 +1,10 @@
 import React, { useRef, useState } from "react";
 import ImageUploader from "../components/ImageUploader";
-import { toBlob } from "html-to-image";
+import { toJpeg } from "html-to-image";
 import GenericMockup from "../components/common/GenericMockup";
 
 const scenes = [
+
   {
     id: "scene2",
     background: "/assets/mockups/FM1.png",
@@ -86,17 +87,18 @@ const scenes = [
       },
     ],
   },
+
 ];
 
 export default function UploadPage() {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
+
   const refs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const handleImageSelect = (file: File) => {
-    const objectUrl = URL.createObjectURL(file);
     setSelectedImage(file);
-    setImageUrl(objectUrl);
+    setImageUrl(URL.createObjectURL(file));
   };
 
   const handleRemoveImage = () => {
@@ -104,57 +106,24 @@ export default function UploadPage() {
     setImageUrl(null);
   };
 
-  const isIphoneChrome = () => {
-    const ua = navigator.userAgent;
-    return /CriOS/.test(ua) && /iPhone/.test(ua);
-  };
-
-  const waitForImagesToLoad = (element: HTMLElement): Promise<void> => {
-    const imgs = element.querySelectorAll("img");
-    const promises = Array.from(imgs).map(
-      (img) =>
-        new Promise<void>((resolve) => {
-          if (img.complete) resolve();
-          else {
-            img.onload = () => resolve();
-            img.onerror = () => resolve();
-          }
-        })
-    );
-    return Promise.all(promises).then(() => undefined);
-  };
-
-  const handleDownload = async (ref: React.RefObject<HTMLDivElement>) => {
-    if (!ref.current) return;
-    await waitForImagesToLoad(ref.current);
-    await new Promise((res) => setTimeout(res, 100));
+  const handleDownload = async (id: string) => {
+    const ref = refs.current[id];
+    if (!ref) return;
 
     try {
-      const blob = await toBlob(ref.current, {
-        quality: 0.95,
-        backgroundColor: "white",
-      });
-
-      if (!blob) throw new Error("Blob creation failed");
-      const url = URL.createObjectURL(blob);
-
-      if (isIphoneChrome()) {
-        window.open(url, "_blank");
-      } else {
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = "mockup.jpg";
-        link.click();
-      }
-    } catch (error) {
-      console.error("שגיאה בהורדה:", error);
-      alert("אירעה שגיאה בהורדה 😢 נסה שוב או דרך Safari");
+      const dataUrl = await toJpeg(ref, { quality: 0.95 });
+      const link = document.createElement("a");
+      link.download = "mockup.jpg";
+      link.href = dataUrl;
+      link.click();
+    } catch (err) {
+      console.error("Error generating JPEG:", err);
     }
   };
 
   return (
     <div className="app py-5 rounded">
-      <h1 className="text-center m-5">העלאת ציור ובחירת מסגרת</h1>
+      <h1 className="text-center m-5" >העלאת ציור ובחירת מסגרת</h1>
       {imageUrl ? (
         <div className="text-center mb-4">
           <div className="pb-5">
@@ -162,7 +131,6 @@ export default function UploadPage() {
               src={imageUrl}
               alt="Preview"
               className="img-fluid rounded"
-              crossOrigin="anonymous"
               style={
                 {
                   maxHeight: "400px",
@@ -192,9 +160,7 @@ export default function UploadPage() {
                   imageStyles={scene.imageStyles}
                   imageClassName={scene.imageClassName}
                   overlays={scene.overlays}
-                  onDownload={() =>
-                    handleDownload({ current: refs.current[scene.id] })
-                  }
+                  onDownload={() => handleDownload(scene.id)}
                 />
               </div>
             ))}
