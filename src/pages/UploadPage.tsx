@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import ImageUploader from "../components/ImageUploader";
 import { toJpeg } from "html-to-image";
 import GenericMockup from "../components/common/GenericMockup";
@@ -6,7 +6,93 @@ import GenericMockup from "../components/common/GenericMockup";
 const scenes = [
 
   {
-    id: "scene2",
+    id: 1,
+    background: "/assets/mockups/FM1.png",
+    imageStyles: {
+      right: "180px",
+      top: "0px",
+      maxWidth: "150px",
+      maxHeight: "150px",
+      "--d": "6px",
+      "--a": "5deg",
+      "--x": "16px",
+      "--_l": "6px",
+      "--_r": "18px",
+    } as React.CSSProperties,
+    imageClassName: "painting_on_canvas_r",
+  },
+  {
+    id: 3,
+    background: "/assets/walls/light_grey.png",
+    imageStyles: {
+      left: "50%",
+      top: "30px",
+      maxHeight: "250px",
+      transform: "translateX(-50%)",
+    } as React.CSSProperties,
+    imageClassName: "black-outer-border",
+  },
+  {
+    id: 5,
+    background: "/assets/walls/dark.png",
+    imageStyles: {
+      left: "50%",
+      top: "30px",
+      maxHeight: "250px",
+      transform: "translateX(-50%)",
+    } as React.CSSProperties,
+    imageClassName: "black-outer-border",
+  },
+  {
+    id: 7,
+    background: "/assets/mockups/FM2.png",
+    imageStyles: {
+      left: "50%",
+      top: "0px",
+      maxHeight: "125px",
+      transform: "translateX(-50%)",
+    } as React.CSSProperties,
+    imageClassName: "black-outer-border",
+    overlays: [
+      {
+        src: "/assets/sunlights/L1.png",
+        style: {
+          width: "460px",
+          right: "240px",
+          top: "-16px",
+          opacity: "0.2",
+        },
+      },
+    ],
+  },
+  {
+    id: 9,
+    background: "/assets/mockups/FM3.png",
+    imageStyles: {
+      left: "50%",
+      top: "-5px",
+      maxHeight: "100px",
+      transform: "translateX(-50%)",
+    } as React.CSSProperties,
+    imageClassName: "black-outer-border",
+    overlays: [
+      {
+        src: "/assets/sunlights/L1.png",
+        style: {
+          width: "500px",
+          right: "180px",
+          top: "-16px",
+          opacity: "0.2",
+        },
+      },
+    ],
+  },
+
+];
+
+const scenes_for_download = [
+  {
+    id: 2,
     background: "/assets/mockups/FM1.png",
     imageStyles: {
       right: "300px",
@@ -22,7 +108,7 @@ const scenes = [
     imageClassName: "painting_on_canvas_r",
   },
   {
-    id: "scene3",
+    id: 4,
     background: "/assets/walls/light_grey.png",
     imageStyles: {
       left: "50%",
@@ -33,7 +119,7 @@ const scenes = [
     imageClassName: "black-outer-border",
   },
   {
-    id: "scene4",
+    id: 6,
     background: "/assets/walls/dark.png",
     imageStyles: {
       left: "50%",
@@ -44,7 +130,7 @@ const scenes = [
     imageClassName: "black-outer-border",
   },
   {
-    id: "scene5",
+    id: 8,
     background: "/assets/mockups/FM2.png",
     imageStyles: {
       left: "50%",
@@ -66,7 +152,7 @@ const scenes = [
     ],
   },
   {
-    id: "scene6",
+    id: 10,
     background: "/assets/mockups/FM3.png",
     imageStyles: {
       left: "50%",
@@ -93,6 +179,7 @@ const scenes = [
 export default function UploadPage() {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [downloadMode,setDownloadMode] = useState(false)
 
   const refs = useRef<Record<string, HTMLDivElement | null>>({});
 
@@ -106,8 +193,16 @@ export default function UploadPage() {
     setImageUrl(null);
   };
 
-  const handleDownload = async (id: string) => {
-    const ref = refs.current[id];
+
+  const delay = (ms: number): Promise<void> => {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  };
+
+
+  const handleDownload = async (id: number) => {
+    setDownloadMode(true)
+    await delay(2000); // השהיה של 2 שניות
+    const ref = refs.current[id+1];
     if (!ref) return;
 
     try {
@@ -116,6 +211,8 @@ export default function UploadPage() {
       link.download = "mockup.jpg";
       link.href = dataUrl;
       link.click();
+      await delay(2000); // השהיה של 2 שניות
+      setDownloadMode(false)
     } catch (err) {
       console.error("Error generating JPEG:", err);
     }
@@ -148,7 +245,25 @@ export default function UploadPage() {
           </div>
 
           <div className="row">
-            {scenes.map((scene) => (
+            { scenes.map((scene) => (
+              <div
+                key={scene.id}
+                className="d-flex justify-content-center col-12 col-xxl-4"
+              >
+                <GenericMockup
+                  ref={(el) => (refs.current[scene.id] = el)}
+                  imageUrl={imageUrl}
+                  backgroundUrl={scene.background}
+                  imageStyles={scene.imageStyles}
+                  imageClassName={scene.imageClassName}
+                  overlays={scene.overlays}
+                  onDownload={() => handleDownload(scene.id)}
+                  backgroundClassName="samllMcBgSize"
+                />
+              </div>
+            ))}
+            
+            {downloadMode && scenes_for_download.map((scene) => (
               <div
                 key={scene.id}
                 className="d-flex justify-content-center col-12 col-xxl-6"
@@ -161,6 +276,7 @@ export default function UploadPage() {
                   imageClassName={scene.imageClassName}
                   overlays={scene.overlays}
                   onDownload={() => handleDownload(scene.id)}
+                  backgroundClassName="fullMcBgSize"
                 />
               </div>
             ))}

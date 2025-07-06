@@ -13,6 +13,17 @@
     background-color: #e2e2e2;
   }
 
+  .samllMcBgSize{
+    width: 400px;
+    height: 100%;
+  }
+
+  .fullMcBgSize{
+    width: 700px;
+    height: 100%;
+  }
+
+
   .painting_on_canvas_l {
     --d: 18px; 
     --a: 20deg;
