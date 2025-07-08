@@ -199,6 +199,22 @@ export default function UploadPage() {
     const ref = refs.current[id + 1];
     if (!ref) return;
 
+    // ודא שכל התמונות נטענו
+    const images = ref.querySelectorAll("img");
+    await Promise.all(
+      Array.from(images).map(
+        (img) =>
+          new Promise<void>((resolve) => {
+            if (img.complete) {
+              resolve();
+            } else {
+              img.onload = () => resolve();
+              img.onerror = () => resolve();
+            }
+          })
+      )
+    );
+
     try {
       const dataUrl = await domtoimage.toJpeg(ref, {
         quality: 0.95,
