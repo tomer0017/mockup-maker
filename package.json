@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "bootstrap": "^5.3.7",
+    "dom-to-image-more": "^3.6.0",
     "html-to-image": "^1.11.13",
     "lucide-react": "^0.525.0",
     "react": "^18.2.0",
